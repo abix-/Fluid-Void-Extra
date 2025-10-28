@@ -3,6 +3,7 @@
 --A mod, redesigned from Rseding91's Fluid Void Mod, to work properly for newer versions.
 --Author: Nibuja05
 --Date: 15.1.2019
+--Fixed by: Community fix for nil amount bug
 -------------------------------------------------------------------------------
 
 local pipeSpeed = {1000, 500, 200, 100, 50, 25, 10, 5, 1}
@@ -75,36 +76,40 @@ function processPipesWithSpeed(speed)
 				if pipe.fluidbox[1] then
 					local content = pipe.fluidbox.get_fluid_segment_contents(1)
                     local _, amount = next(content)
-                    local capacity = pipe.fluidbox.get_capacity(1)
-                    local fill = (amount / capacity) * 100
-
-                    pipe.fluidbox.flush(1, pipe.fluidbox[1])
                     
-                    if settings.global["fluid-void-extra-emit-pollution"].value then
-                        -- ticks per minute 3600
-                        -- 50 pollution per minute: 0.0138888889 per tick
-                        -- 25000 container
-                        -- expected void per minute: 25000 * 10 = 250000 fluid per minute
-                        -- expected fluid per tick: 250000 / 3600 = 69.44444444444444
-                        -- per fluid pollution: 0.0138888889 / 69.44444444444444 = 0.0002
-                        local pollutionPerAmount = 0.0002
-                        local pollution = pollutionPerAmount * amount * settings.global["fluid-void-extra-pollution-multiplier"].value
-                        pipe.surface.pollute(pipe.position, pollution)
-                    end
+                    -- FIX: Check if amount is valid and positive before proceeding
+                    if amount and amount > 0 then
+                        local capacity = pipe.fluidbox.get_capacity(1)
+                        local fill = (amount / capacity) * 100
 
-					if fill > 80 and speed < #pipeSpeed then
-						table.remove(storage.pipes.speedClass[speed], k)
-						if not storage.pipes.speedClass[speed + 1] then
-							storage.pipes.speedClass[speed + 1] = {}
-						end
-						table.insert(storage.pipes.speedClass[speed + 1], pipe)
-					elseif fill < 30 and speed > 1 then
-						table.remove(storage.pipes.speedClass[speed], k)
-						if not storage.pipes.speedClass[speed - 1] then
-							storage.pipes.speedClass[speed - 1] = {}
-						end
-						table.insert(storage.pipes.speedClass[speed - 1], pipe)
-					end
+                        pipe.fluidbox.flush(1, pipe.fluidbox[1])
+                        
+                        if settings.global["fluid-void-extra-emit-pollution"].value then
+                            -- ticks per minute 3600
+                            -- 50 pollution per minute: 0.0138888889 per tick
+                            -- 25000 container
+                            -- expected void per minute: 25000 * 10 = 250000 fluid per minute
+                            -- expected fluid per tick: 250000 / 3600 = 69.44444444444444
+                            -- per fluid pollution: 0.0138888889 / 69.44444444444444 = 0.0002
+                            local pollutionPerAmount = 0.0002
+                            local pollution = pollutionPerAmount * amount * settings.global["fluid-void-extra-pollution-multiplier"].value
+                            pipe.surface.pollute(pipe.position, pollution)
+                        end
+
+                        if fill > 80 and speed < #pipeSpeed then
+                            table.remove(storage.pipes.speedClass[speed], k)
+                            if not storage.pipes.speedClass[speed + 1] then
+                                storage.pipes.speedClass[speed + 1] = {}
+                            end
+                            table.insert(storage.pipes.speedClass[speed + 1], pipe)
+                        elseif fill < 30 and speed > 1 then
+                            table.remove(storage.pipes.speedClass[speed], k)
+                            if not storage.pipes.speedClass[speed - 1] then
+                                storage.pipes.speedClass[speed - 1] = {}
+                            end
+                            table.insert(storage.pipes.speedClass[speed - 1], pipe)
+                        end
+                    end
 				end
 			else
 				table.remove(storage.pipes.speedClass[speed], k)
