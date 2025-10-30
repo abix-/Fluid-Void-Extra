@@ -3,7 +3,9 @@
 --A mod, redesigned from Rseding91's Fluid Void Mod, to work properly for newer versions.
 --Author: Nibuja05
 --Date: 15.1.2019
---Fixed by: Community fix for nil amount bug
+-------------------------------------------------------------------------------
+--Date: 2025-10-30
+---    - Fixed crash "Fluid amount has to be positive" by removing invalid parameter from flush() call
 -------------------------------------------------------------------------------
 
 local pipeSpeed = {1000, 500, 200, 100, 50, 25, 10, 5, 1}
@@ -76,13 +78,13 @@ function processPipesWithSpeed(speed)
 				if pipe.fluidbox[1] then
 					local content = pipe.fluidbox.get_fluid_segment_contents(1)
                     local _, amount = next(content)
+                    local capacity = pipe.fluidbox.get_capacity(1)
                     
-                    -- FIX: Check if amount is valid and positive before proceeding
-                    if amount and amount > 0 then
-                        local capacity = pipe.fluidbox.get_capacity(1)
+                    -- FIX: Flush without passing the fluidbox contents to avoid invalid amount errors
+                    pipe.fluidbox.flush(1)
+                    
+                    if amount and capacity then
                         local fill = (amount / capacity) * 100
-
-                        pipe.fluidbox.flush(1, pipe.fluidbox[1])
                         
                         if settings.global["fluid-void-extra-emit-pollution"].value then
                             -- ticks per minute 3600
