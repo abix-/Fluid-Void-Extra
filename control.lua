@@ -5,7 +5,7 @@
 --Date: 15.1.2019
 -------------------------------------------------------------------------------
 --Date: 2025-10-30
----    - Fixed crash "Fluid amount has to be positive" by removing invalid parameter from flush() call
+--- Fixed crash "Fluid amount has to be positive" by removing invalid parameter from flush() call
 -------------------------------------------------------------------------------
 
 local pipeSpeed = {1000, 500, 200, 100, 50, 25, 10, 5, 1}
