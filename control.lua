@@ -3,9 +3,7 @@
 --A mod, redesigned from Rseding91's Fluid Void Mod, to work properly for newer versions.
 --Author: Nibuja05
 --Date: 15.1.2019
--------------------------------------------------------------------------------
---Date: 2025-10-30
---- Fixed crash "Fluid amount has to be positive" by removing invalid parameter from flush() call
+--Fixed by: Community fix for nil amount bug
 -------------------------------------------------------------------------------
 
 local pipeSpeed = {1000, 500, 200, 100, 50, 25, 10, 5, 1}
@@ -80,8 +78,8 @@ function processPipesWithSpeed(speed)
                     local _, amount = next(content)
                     local capacity = pipe.fluidbox.get_capacity(1)
                     
-                    -- FIX: Flush without passing the fluidbox contents to avoid invalid amount errors
-                    pipe.fluidbox.flush(1)
+                    -- FIX: Set fluidbox to nil to remove all fluid
+                    pipe.fluidbox[1] = nil
                     
                     if amount and capacity then
                         local fill = (amount / capacity) * 100
